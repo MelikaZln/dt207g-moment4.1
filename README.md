@@ -1,6 +1,6 @@
 # Moment 4 Del 1
 
-I den här uppgiften ska vi ha en webbtjänst där användare ska kunna registrera (genom att ange username, password och email, två användare får inte ha samma username och email) och användaren ska kunna logga in. Till slut ska vi ha autentisering med hjälp av JWT och användaren ska autentiseras vid anropt till skyddat data i webbtjänsten. 
+I den här uppgiften ska vi ha en webbtjänst där användare ska kunna registrera (genom att ange username, password och email, två användare får inte ha samma username och email) och användaren ska kunna logga in. När användaren har loggat in ska hen kunna se en lista ööver alla andra användare på webbplatsen. Till slut ska vi ha autentisering med hjälp av JWT och användaren ska autentiseras vid anropt till skyddat data i webbtjänsten. 
 
 Här ska jag beskriva hur jag har löst uppgiften.
 
@@ -28,3 +28,7 @@ const db = new sqlite3.Database(process.env.DATABASE2); här har jag skapat en s
 router.post("/register", async(req, res) => {...}); den tar emot användarnamn, lösenord och email från request bodyn. Om något saknas returneras 400 status med felmeddelande. Sedan hashas lösenordet med bcrypt (för säkerhetens skull) och en förfrågan körs för att lägga till användaren i databasen. När användaren har skapats framgångsrikt så får man ett meddelande och status 201. I händelse av ett serverfel returneras en 500 Internal Server Error-status.
 router.post("/login", async (req, res) => {...}); sedan finns det en POST-route /login som hanterar inloggning av användare. Den tar emot användarnamn och lösenord från request bodyn. Om något av dessa fält saknas returneras en 400 Bad Request-status med ett felmeddelande. Sedan kontrolleras om användaren finns i databasen. Om användaren inte finns returneras en 401 Unauthorized-status med ett meddelande om att användarnamn eller lösenord är inkorrekta(jag har inte separate felmeddelande för username och password för att öka säkerheten). Annars jämförs det angivna lösenordet med det hashade lösenordet i databasen med bcrypt. Om lösenorden matchar skapas en JWT-token med användarnamnet som payload och skickas till klienten tillsammans med ett meddelande om att användaren har loggats in.
 module.exports= router; Till slut exporteras router så att den kan användas i andra delar av din applikation.
+Jag har router.get("/usernames", authenticateToken, (req, res) => {...}); som hanterar autentiserade användare, genom det hämtas alla användare från database.
+authenticateToken: är en middlewarefunktion som verifierar giltigheten av JWT-token som skickas med förfrågningen. så bara de användare som är inloggda kan komma åt denna rutt.
+sedan har jag en sql-fråga för att välja alla användarnamn från tabellen users.
+Om inget fel uppstår omvandlas hämtade användarnamn till en lista och skickas som svar med en statuskod (200) i JSON-format.
